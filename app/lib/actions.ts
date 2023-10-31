@@ -124,12 +124,22 @@ export async function authenticate(
 	prevState: string | undefined,
 	formData: FormData
 ) {
+	// Fixed from suggestions in https://github.com/vercel/next-learn/issues/252
+	let responseRedirectUrl = null;
 	try {
-		await signIn("credentials", Object.fromEntries(formData));
+		responseRedirectUrl = await signIn("credentials", {
+			...Object.fromEntries(formData),
+			redirect: false,
+		});
 	} catch (error) {
+		console.log("error", error);
 		if ((error as Error).message.includes("CredentialsSignin")) {
-			return "CredentialsSignin";
+			return "CredentialSignin";
 		}
 		throw error;
+	} finally {
+		if (responseRedirectUrl) {
+			redirect(responseRedirectUrl);
+		}
 	}
 }
